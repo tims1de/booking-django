@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:15
+    container_name: django_orm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env-docker
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:7
+    container_name: django_redis
+    ports:
+      - 6379:6379
+
+
+  api:
+    build:
+      context: .
+    image: django_orm
+    container_name: django_orm
+    env_file:
+      - .env-docker
+    depends_on:
+      - db
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+
+volumes:
+  postgres_data:
